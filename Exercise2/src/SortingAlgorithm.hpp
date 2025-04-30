@@ -8,85 +8,78 @@ using namespace std;
 namespace SortLibrary {
 
 template<typename T>
-void heapify(std::vector<T>& v, int start, int n, int i) {
-    int largest = i;
-    int left = 2 * (i - start) + 1 + start;
-    int right = 2 * (i - start) + 2 + start;
+concept Sortable = requires(T& t) 
+{
+    {t < t} -> std::convertible_to<bool>; //garantisce che il tipo dato supporti il confronto "minore di
+};
 
-    if (left <= n && v[left] > v[largest])
+template<Sortable T>
+void heapify(vector<T>& v, unsigned int n, unsigned int i)
+{
+    unsigned int largest = i; //inizializzo largest come radice
+    unsigned int left = 2 * i + 1; //figlio sinistro
+    unsigned int right = 2 * i + 2; //figlio destro
+
+    //Se il figlio sinistro esiste ed è maggiore della radice
+    if (left < n && v[left] > v[largest]) 
         largest = left;
 
-    if (right <= n && v[right] > v[largest])
+    //Se il figlio destro esiste ed è maggiore della radice
+    if (right < n && v[right] > v[largest]) 
         largest = right;
-
-    if (largest != i) {
-        std::swap(v[i], v[largest]);
-        heapify(v, start, n, largest);
-    }
+    
+     //Se largest non è la radice (ovvero se è cambiato)
+     if (largest != i) 
+     {
+     //swap
+     T tmp = v[i];
+     v[i] = v[largest];
+     v[largest] = tmp;
+     //Ricorsione per heapify il sottoalbero
+     heapify(v, n, largest);
+     }
 }
 
-template<typename T>
-void HeapSort(std::vector<T>& v, int start, int end) {
-    // Build max heap
-    for (int i = (start + end) / 2; i >= start; --i)
-        heapify(v, start, end, i);
-
-    // Extract elements from heap one by one
-    for (int i = end; i > start; --i) {
-        std::swap(v[start], v[i]);
-        heapify(v, start, i - 1, start);
-    }
-}
-
-template<typename T>
-void SelectionSort(std::vector<T>& v) {
-    size_t n = v.size();
-    for (size_t i = 0; i < n - 1; ++i) {
-        size_t min_index = i;
-        for (size_t j = i + 1; j < n; ++j) {
-            if (v[j] < v[min_index]) {
-                min_index = j;
-            }
-        }
-        if (min_index != i) {
-            std::swap(v[i], v[min_index]);
-        }
-    }
-}
-
-template<typename T>
-void InsertionSort(std::vector<T>& v) {
-    size_t n = v.size();
-    for (size_t i = 1; i < n; ++i) {
-        T key = v[i];
-        int j = i - 1;
-        while (j >= 0 && v[j] > key) {
-            v[j + 1] = v[j];
-            j--;
-        }
-        v[j + 1] = key;
-    }
-}
-
-
-template<typename T>
-void BubbleSort(std::vector<T>& data)
+template<Sortable T>
+void HeapSort(vector<T>& v)
 {
-    size_t rem_size = data.size();
-    size_t last_seen = rem_size;
-    bool swapped = true;
+   const unsigned int n = v.size(); //salvo la dimensione (costante) del vettore
 
-    while (swapped) {
-        swapped = false;
-        for (size_t i = 1; i < rem_size; i++) {
-            if (data[i-1] > data[i]) {
-                std::swap(data[i-1], data[i]);
-                swapped = true;
-                last_seen = i;
+   //Costruisco un max heap
+   for (int i = n/2 -1; i >=0; i--) 
+        heapify(v, n, i); 
+   //Ora il vettore v ha come primo elemento (all'indice 0) il suo massimo (max heap)
+   
+   //Estraggo gli elementi uno alla volta dal max heap
+   for (int i = n - 1; i > 0; i--) 
+   {
+       //swap (scambio l'ultimo elemento con la radice (cioé il primo e quindi il massimo))
+       T tmp = v[0];
+       v[0] = v[i];
+       v[i] = tmp;
+       //Heapify il max heap ridotto di uno (quindi escludo l'ultimo elemento che è già ordinato e trovo il massimo dei rimanenti mettendolo in prima posizione)
+       heapify(v, i, 0); //itero finche l'ultimo elemento non è ordinato
+   }
+}
+
+template<typename T>
+void BubbleSort(vector<T>& v) //funzione BubbleSort
+//prendo come parametro un riferimento ad un vettore di elementi di tipo T (che rispetta i requisiti del concetto Sortable)
+
+{
+    const unsigned int n = v.size(); //dim del vettore
+    for (unsigned int i = 0; i < n - 1; i++) 
+    {
+        for (unsigned int j=i+1; j<n; j++) 
+        {
+            if (v[j] < v[i]) //se l'elemento successivo j è minore dell'elemento i, si esegue uno scambio
+            //scambio
+            {
+                T tmp = v[i]; 
+                v[i] = v[j];
+                v[j] = tmp;
             }
         }
-//        rem_size = rem_size - 1;
-        rem_size = last_seen;
     }
 }
 
